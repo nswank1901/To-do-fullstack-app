@@ -1,0 +1,84 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f4f4f4;
+    margin: 20px;
+}
+
+#task-form input {
+    padding: 8px;
+    font-size: 16px;
+}
+
+#task-form button {
+    background-color:#4dd46f;
+    border: none;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#task-form button:hover {
+    opacity: 0.8;
+}
+
+#task-list li {
+    padding: 8px;
+    margin-bottom: 4px;
+    background-color: #fff;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#task-list li input {
+    cursor: pointer;
+}
+
+#task-list li input[type="text"] {
+    cursor: text;
+    font-size: inherit;
+    width: 80%;
+}
+
+@media (min-width: 1000px) {
+    #task-list {
+        max-width: 85%;
+    }
+}
+
+#task-list li span {
+    margin-left: 8px;
+    flex: 1;
+}
+
+#task-list li.completed span {
+    text-decoration: line-through;
+    color: gray;
+}
+
+.btn-container {
+    display: flex;
+    gap: 10px;
+}
+
+#task-list button {
+    border: none;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#task-list button.delete {
+    background-color: #e74c3c;
+}
+
+#task-list button.edit {
+    background-color: rgb(199, 199, 25);
+}
+
+#task-list button:hover {
+    opacity: 0.7;
+}

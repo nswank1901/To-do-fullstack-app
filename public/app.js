@@ -2,84 +2,103 @@
  * Fetch API calls
  ************************************************************************
  */
+const request = async (url, options = {}) => {
+  try {
+    const res = await fetch(url, options);
+    if (!res.ok) throw new Error((await res.text()) || "Request failed");
+    return res.status !== 204 ? res.json() : true;
+  } catch (err) {
+    console.error("Fetch error occurred", err);
+    return null;
+  }
+};
+
 // fetch tasks: GET
 // This function asks the backend for all tasks in the database
 // It waits for the response, converts it from JSON into a JavaScript array/object, and returns it
-async function getTasks() {
-  try {
-    const res = await fetch("/tasks"); // call backend endpoint
-    const tasks = await res.json(); // parse JSON
-    return tasks;
-  } catch (err) {
-    console.error("Error fetching tasks: ", err);
-  }
-}
+const getTasks = () => request("/tasks");
 
 // add tasks: POST
 // This function sends a new task to the backend to be saved in the database
 // The task only has a title here, which is converted to JSON and sent in the request body
-async function addTask(title) {
-  try {
-    await fetch("/tasks", {
-      method: "POST", // what kind of request
-      headers: { "Content-Type": "application/json" }, // what kind of data
-      body: JSON.stringify({ title }), // what data exactly
-    });
-  } catch (err) {
-    console.error("Error adding task:", err);
-  }
-}
+const addTask = (newTask) => {
+  request("/tasks", {
+    method: "POST", // what kind of request
+    headers: { "Content-Type": "application/json" }, // what kind of data
+    body: JSON.stringify(newTask), // what data exactly
+  });
+};
 
 // update tasks (title, completed): PATCH
 // This function updates a specific task in the database
 // You can change the title, mark it completed/uncompleted, or both
 // It sends only the fields you want to change in the `updates` object
-async function updateTask(id, updates) {
-  try {
-    const res = await fetch(`/tasks/${id}`, {
-      method: "PATCH", // type of request: partial update
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates), // fields to update, e.g., { title: "New", completed: true }
-    });
-    if (!res.ok) {
-      // check if backend returned an error
-      const text = await res.text();
-      throw new Error(text || "Update failed");
-    }
-    return await res.json(); // return the updated task from backend
-  } catch (err) {
-    console.error("Error updating task:", err);
-    return null;
-  }
-}
+const updateTask = (id, updates) => {
+  request(`/tasks/${id}`, {
+    method: "PATCH", // type of request: partial update
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(updates), // fields to update, e.g., { title: "New", completed: true }
+  });
+};
 
 // delete tasks: DELETE
 // This function deletes a task from the backend by its id
 // It tells the backend which task to remove, waits for confirmation, and returns true if successful
-async function deleteTask(id) {
-  try {
-    const res = await fetch(`/tasks/${id}`, { method: "DELETE" });
-    if (!res.ok) {
-      // check if backend returned an error
-      const text = await res.text();
-      throw new Error(text || "Delete failed");
-    }
-    return true; // return true if delete succeeded
-  } catch (err) {
-    console.error("Error deleting task:", err);
-    return false;
-  }
-}
+const deleteTask = (id) => request(`/tasks/${id}`, { method: "DELETE" });
 
 /*************************************************************************
  * Loading, rendering pages
  ************************************************************************
  */
 
-// render tasks
-// This function takes an array of tasks and displays them in the browser
-// It creates an <li> for each task, adds a checkbox, title, and delete button
-// It also visually marks tasks as completed if needed
+ /**
+  * Helper: create a div containing all task info
+  */
+ function createTaskInfo(task) {
+// create a container for task info
+    const info  = document.createElement("div");
+    info.classList.add("task-info");
+
+    // display title
+    const title = document.createElement("span");
+    title.classList.add("task-title");
+    title.textContent = task.title;
+
+    // display due date
+    const dueDate = document.createElement("span");
+    dueDate.classList.add("task-due");
+    if (task.due_date) {
+      const date = new Date(task.due_date);
+      dueDate.textContent = `Due: ${date.toLocaleDateString()}`;
+    }
+    else {
+      dueDate.textContent = `Due: N/A`;
+    }
+
+    // display priority
+    const priority = document.createElement("span");
+    priority.classList.add("task-priority");
+    priority.textContent = `Priority: ${task.priority || "medium"}`;
+
+    // estimated time in hours and minutes
+    const estHours = Math.floor(task.estimated_time/60);
+    const estMins = task.estimated_time % 60;
+    const estimated = document.createElement("span");
+    estimated.classList.add("task-estimated");
+    estimated.textContent = `Est: ${estHours}Hrs ${estMins}min.`;
+
+    // append all task info to info container
+    info.append(title, dueDate, priority, estimated);
+    return info;
+}
+
+/**
+ * render tasks
+    This function takes an array of tasks and displays them in the browser
+    It creates an <li> for each task, adds a checkbox, title, and delete button
+    It also visually marks tasks as completed if needed
+ */
+
 function renderTasks(tasks) {
   const list = document.getElementById("task-list");
   list.innerHTML = ""; // clear existing tasks
@@ -93,9 +112,7 @@ function renderTasks(tasks) {
     checkbox.type = "checkbox";
     checkbox.checked = !!task.completed; // double-bang ensures it's a true boolean
 
-    // span element to display task title
-    const span = document.createElement("span");
-    span.textContent = task.title;
+    const info = createTaskInfo(task);
 
     // delete button for each task
     const delBtn = document.createElement("button");
@@ -119,20 +136,17 @@ function renderTasks(tasks) {
     }
 
     // append elements to the li
-    li.appendChild(checkbox);
-    li.appendChild(span);
-    li.appendChild(btnContainer);
+    li.append(checkbox, info, btnContainer)
 
     // append the li to the tasklist in the DOM
     list.appendChild(li);
   });
 }
 
-// load tasks when the page loads
-document.addEventListener("DOMContentLoaded", async () => {
-  const tasks = await getTasks();
-  renderTasks(tasks);
-});
+async function refreshTasks() {
+  const tasks = await getTasks(); // fetch backend tasks, re-render
+  if (tasks) renderTasks(tasks);
+}
 
 /**************************************************************************
  * Event listeners
@@ -144,16 +158,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 document.getElementById("task-form").addEventListener("submit", async (e) => {
   e.preventDefault(); // stop page reload on form submit
 
-  const input = document.getElementById("task-input");
-  const title = input.value.trim();
+  const title = document.getElementById("task-input").value.trim();
+  // const title = input.value.trim();
+  const due_date = document.getElementById("due-date").value;
+  const priority = document.getElementById("priority").value;
+
+  // convert hours + minutes => total minutes
+  const minutes = parseInt(document.getElementById("minutes").value) || 0;
+  const hours = parseInt(document.getElementById("hours").value) || 0;
+  const estimated_time = minutes + hours * 60;
 
   if (!title) return; // don't allow empty tasks
 
-  await addTask(title); // call the function to add task to backend
-  input.value = ""; // clear the input field
+  const newTask = {
+    title,
+    completed: false,
+    due_date,
+    priority,
+    estimated_time,
+  };
 
-  const tasks = await getTasks(); // fetch updated tasks from backend, re-render
-  renderTasks(tasks);
+  await addTask(newTask); // call the function to add task to backend
+  await refreshTasks();
+
+  e.target.reset(); //  clear form after submit
 });
 
 // Single event listener for all interactions in the task list
@@ -168,8 +196,7 @@ document.getElementById("task-list").addEventListener("click", async (e) => {
     if (!confirm("Delete this task?")) return; // ask for confirmation
     const ok = await deleteTask(id); // call backend to delete task
     if (ok) {
-      const tasks = await getTasks(); // fetch updated tasks, re-render
-      renderTasks(tasks);
+      await refreshTasks();
     }
   }
 
@@ -202,8 +229,8 @@ document.getElementById("task-list").addEventListener("click", async (e) => {
         }
         const newTitle = input.value.trim();
         await updateTask(id, { title: newTitle });
-        const tasks = await getTasks();
-        renderTasks(tasks);
+
+        await refreshTasks();
       } else if (e.key === "Escape") {
         // Cancel editing: put the original span back
         input.replaceWith(span);
@@ -215,7 +242,12 @@ document.getElementById("task-list").addEventListener("click", async (e) => {
   if (e.target.type === "checkbox") {
     const completed = e.target.checked; // get the checkbox state
     await updateTask(id, { completed }); // update task in backend
-    const tasks = await getTasks(); // fetch backend tasks, re-render
-    renderTasks(tasks);
+
+    await refreshTasks();
   }
+});
+
+// load tasks when the page loads
+document.addEventListener("DOMContentLoaded", async () => {
+  await refreshTasks();
 });

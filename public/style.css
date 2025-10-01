@@ -1,84 +1,128 @@
 body {
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #f4f4f4;
-    margin: 20px;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #f4f4f4;
+  margin: 20px;
 }
 
 #task-form input {
-    padding: 8px;
-    font-size: 16px;
+  padding: 8px;
+  font-size: 16px;
 }
 
 #task-form button {
-    background-color:#4dd46f;
-    border: none;
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
+  background-color: #4dd46f;
+  border: none;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 #task-form button:hover {
-    opacity: 0.8;
+  opacity: 0.8;
 }
 
 #task-list li {
-    padding: 8px;
-    margin-bottom: 4px;
-    background-color: #fff;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  padding: 8px;
+  margin-bottom: 4px;
+  background-color: #fff;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 #task-list li input {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 #task-list li input[type="text"] {
-    cursor: text;
-    font-size: inherit;
-    width: 80%;
+  cursor: text;
+  font-size: inherit;
+  width: 80%;
 }
 
 @media (min-width: 1000px) {
-    #task-list {
-        max-width: 85%;
-    }
+  #task-list {
+    max-width: 85%;
+  }
 }
 
 #task-list li span {
-    margin-left: 8px;
-    flex: 1;
+  margin-left: 8px;
+  flex: 1;
 }
 
 #task-list li.completed span {
-    text-decoration: line-through;
-    color: gray;
+  text-decoration: line-through;
+  color: gray;
 }
 
 .btn-container {
+  display: flex;
+  gap: 10px;
+}
+
+#task-list li {
     display: flex;
-    gap: 10px;
+    align-items: center;
+    gap: 12px;
+}
+
+#task-list li input[type="checkbox"] {
+  flex: 0 0 auto;
 }
 
 #task-list button {
-    border: none;
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
+  border: none;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 #task-list button.delete {
-    background-color: #e74c3c;
+  background-color: #e74c3c;
 }
 
 #task-list button.edit {
-    background-color: rgb(199, 199, 25);
+  background-color: rgb(38, 151, 226);
 }
 
 #task-list button:hover {
-    opacity: 0.7;
+  opacity: 0.7;
+}
+
+.task-info {
+  display: grid;
+  grid-template-columns: 250px 120px 120px 120px; /* fixed column widths */
+  gap: 16px;
+  align-items: center;
+}
+
+.task-title {
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-due,
+.task-priority,
+.task-estimated {
+  font-size: 0.9rem;
+  color: #555;
+  white-space: nowrap;
+}
+
+li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid #ccc;
+}
+
+.btn-container button {
+    margin-left: 4px;
 }

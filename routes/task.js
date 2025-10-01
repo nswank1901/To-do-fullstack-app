@@ -15,7 +15,9 @@ router.get("/", (req, res) => {
 
 // POST /tasks - add a new task
 router.post("/", (req, res) => {
-  const { title, completed } = req.body; // get the task title from the request body
+  let { title, completed, due_date, priority, estimated_time } = req.body; // get the task title from the request body
+
+  console.log("request body: ", req.body);
 
   if (!title) {
     res.status(400).send("Task title is required");
@@ -32,22 +34,36 @@ router.post("/", (req, res) => {
     isCompleted = 0; // user explicitly sets false
   }
 
-  const sql = "INSERT INTO tasks (title, completed) VALUES(?, ?)";
-  db.query(sql, [title, isCompleted], (err, result) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send("Error adding task to database");
+  if (estimated_time === undefined) {
+    estimated_time = 0;
+  }
+
+  const sql =
+    "INSERT INTO tasks (title, completed, due_date, priority, estimated_time) VALUES(?, ?, ?, ?, ?)";
+  db.query(
+    sql,
+    [title, isCompleted, due_date, priority, estimated_time],
+    (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send("Error adding task to database");
+      }
+      res.status(201).json({
+        id: result.insertId,
+        title,
+        completed: isCompleted,
+        due_date,
+        priority,
+        estimated_time,
+      });
     }
-    res
-      .status(201)
-      .json({ id: result.insertID, title, completed: isCompleted });
-  });
+  );
 });
 
 // UPDATE /tasks:id - mark a task as completed (or update title)
 router.patch("/:id", (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const { title, completed } = req.body;
+  const { title, completed, due_date, priority, estimated_time } = req.body;
 
   // Build SQL dynamically depending on what is being updated (task or title)
   let sql = "UPDATE tasks SET ";
@@ -64,6 +80,18 @@ router.patch("/:id", (req, res) => {
     isCompleted = completed === true || completed === "true" ? 1 : 0;
     fields.push("completed = ?");
     values.push(isCompleted);
+  }
+  if (due_date !== undefined) {
+    fields.push("due_date = ?");
+    values.push(due_date);
+  }
+  if (priority !== undefined) {
+    fields.push("priority = ?");
+    values.push(priority);
+  }
+  if (due_date !== undefined) {
+    fields.push("estimated_time = ?");
+    values.push(estimated_time);
   }
 
   // No fields
@@ -87,6 +115,9 @@ router.patch("/:id", (req, res) => {
     const response = { id };
     if (title !== undefined) response.title = title;
     if (completed !== undefined) response.completed = isCompleted;
+    if (due_date !== undefined) response.due_date = due_date;
+    if (priority !== undefined) response.priority = priority;
+    if (estimated_time !== undefined) response.estimated_time = estimated_time;
 
     res.json(response);
   });
@@ -106,7 +137,7 @@ router.delete("/:id", (req, res) => {
       return res.status(404).send("Task not found");
     }
 
-    res.send(`Task with ID ${id} deleted`);
+    res.json({ success: true, id });
   });
 });
 

@@ -37,6 +37,24 @@
       <button type="submit">Add Task</button>
     </form>
 
+    <div id="controls">
+      <!-- Filter -->
+      <label for="filter">Filter:</label>
+      <select id="filter">
+        <option value="all">All</option>
+        <option value="completed">Completed</option>
+        <option value="not-completed">Not Completed</option>
+      </select>
+
+      <!-- Sort -->
+      <label for="sort">Sort:</label>
+      <select id="sort">
+        <option value="none">None</option>
+        <option value="date-asc">Due Date (earliest)</option>
+        <option value="date-desc">Due Date (latest)</option>
+      </select>
+    </div>
+
     <ul id="task-list">
       <!-- JS to populate tasks here-->
     </ul>

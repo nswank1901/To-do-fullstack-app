@@ -51,45 +51,44 @@ const deleteTask = (id) => request(`/tasks/${id}`, { method: "DELETE" });
  ************************************************************************
  */
 
- /**
-  * Helper: create a div containing all task info
-  */
- function createTaskInfo(task) {
-// create a container for task info
-    const info  = document.createElement("div");
-    info.classList.add("task-info");
+/**
+ * Helper: create a div containing all task info
+ */
+function createTaskInfo(task) {
+  // create a container for task info
+  const info = document.createElement("div");
+  info.classList.add("task-info");
 
-    // display title
-    const title = document.createElement("span");
-    title.classList.add("task-title");
-    title.textContent = task.title;
+  // display title
+  const title = document.createElement("span");
+  title.classList.add("task-title");
+  title.textContent = task.title;
 
-    // display due date
-    const dueDate = document.createElement("span");
-    dueDate.classList.add("task-due");
-    if (task.due_date) {
-      const date = new Date(task.due_date);
-      dueDate.textContent = `Due: ${date.toLocaleDateString()}`;
-    }
-    else {
-      dueDate.textContent = `Due: N/A`;
-    }
+  // display due date
+  const dueDate = document.createElement("span");
+  dueDate.classList.add("task-due");
+  if (task.due_date) {
+    const date = new Date(task.due_date);
+    dueDate.textContent = `Due: ${date.toLocaleDateString()}`;
+  } else {
+    dueDate.textContent = `Due: N/A`;
+  }
 
-    // display priority
-    const priority = document.createElement("span");
-    priority.classList.add("task-priority");
-    priority.textContent = `Priority: ${task.priority || "medium"}`;
+  // display priority
+  const priority = document.createElement("span");
+  priority.classList.add("task-priority");
+  priority.textContent = `Priority: ${task.priority || "medium"}`;
 
-    // estimated time in hours and minutes
-    const estHours = Math.floor(task.estimated_time/60);
-    const estMins = task.estimated_time % 60;
-    const estimated = document.createElement("span");
-    estimated.classList.add("task-estimated");
-    estimated.textContent = `Est: ${estHours}Hrs ${estMins}min.`;
+  // estimated time in hours and minutes
+  const estHours = Math.floor(task.estimated_time / 60);
+  const estMins = task.estimated_time % 60;
+  const estimated = document.createElement("span");
+  estimated.classList.add("task-estimated");
+  estimated.textContent = `Est: ${estHours}Hrs ${estMins}min.`;
 
-    // append all task info to info container
-    info.append(title, dueDate, priority, estimated);
-    return info;
+  // append all task info to info container
+  info.append(title, dueDate, priority, estimated);
+  return info;
 }
 
 /**
@@ -136,22 +135,56 @@ function renderTasks(tasks) {
     }
 
     // append elements to the li
-    li.append(checkbox, info, btnContainer)
+    li.append(checkbox, info, btnContainer);
 
     // append the li to the tasklist in the DOM
     list.appendChild(li);
   });
 }
 
-async function refreshTasks() {
-  const tasks = await getTasks(); // fetch backend tasks, re-render
-  if (tasks) renderTasks(tasks);
+async function refreshTasks(filter = "all", sort = "none") {
+  let tasks = await getTasks(); // fetch tasks from backend
+  if (!tasks) return;
+
+  // Filtering
+  if (filter === "completed") {
+    tasks = tasks.filter((task) => task.completed === 1);
+  } else if (filter === "not-completed") {
+    tasks = tasks.filter((task) => task.completed === 0);
+  }
+
+  // Sorting
+  if (sort === "date-asc") {
+    tasks.sort((a, b) => new Date(a.due_date) - new Date(b.due_date));
+  } else if (sort === "date-desc") {
+    tasks.sort((a, b) => new Date(b.due_date) - new Date(a.due_date));
+  }
+
+  renderTasks(tasks);
 }
 
 /**************************************************************************
  * Event listeners
  ************************************************************************
  */
+// show all tasks when page first loads
+document.addEventListener("DOMContentLoaded", () => {
+  refreshTasks();
+});
+
+// Event listeners for filtering and sorting
+const filterSelect = document.getElementById("filter");
+const sortSelect = document.getElementById("sort");
+
+filterSelect.addEventListener("change", (e) => {
+  console.log("Filter selected:", e.target.value);
+  refreshTasks(filterSelect.value, sortSelect.value);
+});
+
+document.getElementById("sort").addEventListener("change", (e) => {
+  console.log("Sort selected:", e.target.value);
+  refreshTasks(filterSelect.value, sortSelect.value);
+});
 
 // Adding a task: listen for form submission
 // When the user types a task and submits the form, this runs

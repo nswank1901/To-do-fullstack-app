@@ -1,6 +1,6 @@
 // pagination state variables
 let currentPage = 1;
-const limit = 5; // how many tasks per page
+const limit = 10; // how many tasks per page
 
 // filter & sort state variables
 let currentFilter = "all";
@@ -24,7 +24,7 @@ const request = async (url, options = {}) => {
 // fetch tasks: GET
 // This function asks the backend for all tasks in the database
 // It waits for the response, converts it from JSON into a JavaScript array/object, and returns it
-const getTasks = async (page = 1, limit = 5) =>  {
+const getTasks = async (page = 1, limit = 10) =>  {
   const offset = (page - 1) * limit;
   return await request(`/tasks?limit=${limit}&offset=${offset}`);
 };

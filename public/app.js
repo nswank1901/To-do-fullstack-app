@@ -317,17 +317,10 @@ document.getElementById("prevPage").addEventListener("click", async () => {
   if (currentPage > 1) {
     currentPage--;
     await refreshTasks(currentFilter, currentSort);
-    updatePageInfo();
   }  
 });
-
-// helper function to update "Page X" text
-function updatePageInfo() {
-  document.getElementById("page-info").textContent = `Page ${currentPage}`;
-}
 
 // load tasks when the page loads
 document.addEventListener("DOMContentLoaded", async () => {
   await refreshTasks(currentFilter, currentSort);
-  updatePageInfo();
 });

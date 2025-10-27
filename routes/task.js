@@ -9,7 +9,7 @@ router.get("/", (req, res) => {
   const offset = parseInt(req.query.offset, 10) || 0;
 
   // Query tasks for current page
-  const tasksQuery = "SELECT * FROM tasks ORDER BY due_date ASC LIMIT ? OFFSET ?";
+  const tasksQuery = "SELECT * FROM tasks ORDER BY id ASC LIMIT ? OFFSET ?";
   
   db.query(tasksQuery, [limit, offset], (err, tasks) => {
     if (err) {

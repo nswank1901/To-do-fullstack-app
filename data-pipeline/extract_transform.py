@@ -6,9 +6,9 @@ from datetime import datetime
 df = pd.read_csv("../extracted_tasks.csv", parse_dates=["due_date", "created_at"])
 
 # Quick check of data
-print("Dataframe head: ", df.head)
-print("\nDataframe info: ", df.info())
-print("\nDataframe description: \n", df.describe())
+# print("Dataframe head: ", df.head)
+# print("\nDataframe info: ", df.info())
+# print("\nDataframe description: \n", df.describe())
 
 # Step 2: Transform / aggregate metrics
 ##############################

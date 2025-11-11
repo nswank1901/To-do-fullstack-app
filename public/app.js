@@ -1,3 +1,11 @@
+// pagination state variables
+let currentPage = 1;
+const limit = 10; // how many tasks per page
+
+// filter & sort state variables
+let currentFilter = "all";
+let currentSort = "none";
+
 /**************************************************************************
  * Fetch API calls
  ************************************************************************
@@ -16,7 +24,10 @@ const request = async (url, options = {}) => {
 // fetch tasks: GET
 // This function asks the backend for all tasks in the database
 // It waits for the response, converts it from JSON into a JavaScript array/object, and returns it
-const getTasks = () => request("/tasks");
+const getTasks = async (page = 1, limit = 10) =>  {
+  const offset = (page - 1) * limit;
+  return await request(`/tasks?limit=${limit}&offset=${offset}`);
+};
 
 // add tasks: POST
 // This function sends a new task to the backend to be saved in the database
@@ -143,8 +154,10 @@ function renderTasks(tasks) {
 }
 
 async function refreshTasks(filter = "all", sort = "none") {
-  let tasks = await getTasks(); // fetch tasks from backend
-  if (!tasks) return;
+  const data = await getTasks(currentPage, limit); // fetch tasks from backend
+  if(!data) return;
+
+  let {tasks, total} = data;
 
   // Filtering
   if (filter === "completed") {
@@ -161,6 +174,18 @@ async function refreshTasks(filter = "all", sort = "none") {
   }
 
   renderTasks(tasks);
+  updatePaginationButtons(total);
+}
+
+function updatePaginationButtons(totalTasks) {
+  const totalPages = Math.ceil(totalTasks / limit);
+
+  // disable/enable buttons
+  document.getElementById("prevPage").disabled = currentPage === 1;
+  document.getElementById("nextPage").disabled = currentPage === totalPages;
+
+  // update page info
+  document.getElementById("page-info").textContent = `Page ${currentPage} of ${totalPages}`;
 }
 
 /**************************************************************************
@@ -177,13 +202,13 @@ const filterSelect = document.getElementById("filter");
 const sortSelect = document.getElementById("sort");
 
 filterSelect.addEventListener("change", (e) => {
-  console.log("Filter selected:", e.target.value);
-  refreshTasks(filterSelect.value, sortSelect.value);
+  currentFilter = e.target.value;
+  refreshTasks(currentFilter, currentSort);
 });
 
 document.getElementById("sort").addEventListener("change", (e) => {
-  console.log("Sort selected:", e.target.value);
-  refreshTasks(filterSelect.value, sortSelect.value);
+  currentSort = e.target.value;
+  refreshTasks(currentFilter, currentSort);
 });
 
 // Adding a task: listen for form submission
@@ -280,7 +305,22 @@ document.getElementById("task-list").addEventListener("click", async (e) => {
   }
 });
 
+
+// pagination event listeners
+document.getElementById("nextPage").addEventListener("click", async () => {
+  currentPage++;
+  await refreshTasks(currentFilter, currentSort);
+  updatePageInfo();
+});
+
+document.getElementById("prevPage").addEventListener("click", async () => {
+  if (currentPage > 1) {
+    currentPage--;
+    await refreshTasks(currentFilter, currentSort);
+  }  
+});
+
 // load tasks when the page loads
 document.addEventListener("DOMContentLoaded", async () => {
-  await refreshTasks();
+  await refreshTasks(currentFilter, currentSort);
 });

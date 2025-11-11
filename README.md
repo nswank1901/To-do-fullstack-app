@@ -16,3 +16,10 @@ Optional CSV/JSON import to practice ETL-style data ingestion
 Focus on real-world SQL queries, grouping, and reporting
 
 Tech Stack: Node.js, Express, MySQL, vanilla JavaScript, HTML/CSS, optional Chart.js for visualizations
+
+
+To set up the database:
+
+1. Open MySQL or your SQL client.
+2. Run the commands in `schema.sql` to create the database and table.
+3. Update your `.env` file with the correct database credentials.

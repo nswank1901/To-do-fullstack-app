@@ -7,7 +7,7 @@
   </head>
   <body>
     <h1>My To-do List</h1>
-
+    <a href="/analytics.html">View Analytics</a>
     <form id="task-form">
       <input type="text" id="task-input" placeholder="New task..." required />
       <label for="due-date">Due Date:</label>
@@ -55,9 +55,17 @@
       </select>
     </div>
 
-    <ul id="task-list">
-      <!-- JS to populate tasks here-->
-    </ul>
+    <div id="task-container">
+      <ul id="task-list">
+        <!-- JS to populate tasks here-->
+      </ul>
+      <div id="pagination-controls">
+        <button id="prevPage">Previous</button>
+        <span id="page-info">Page 1</span>
+        <button id="nextPage">Next</button>
+      </div>
+    </div>
+
     <script src="app.js" defer></script>
   </body>
 </html>

@@ -4,12 +4,31 @@ const db = require("../db/db.js");
 
 // GET /tasks - fetch all tasks
 router.get("/", (req, res) => {
-  db.query("SELECT * FROM tasks", (err, results) => {
+  // Get limit and offest query parameters, or default to 20 and 0
+  const limit = parseInt(req.query.limit, 10) || 20;
+  const offset = parseInt(req.query.offset, 10) || 0;
+
+  // Query tasks for current page
+  const tasksQuery = "SELECT * FROM tasks ORDER BY id ASC LIMIT ? OFFSET ?";
+  
+  db.query(tasksQuery, [limit, offset], (err, tasks) => {
     if (err) {
       console.error(err);
       return res.status(500).send("Error fetching tasks from database");
     }
-    res.json(results); // send tasks as JSON
+
+    // Query total number of tasks
+    const countQuery = "SELECT COUNT(*) AS total from tasks";
+    db.query(countQuery, (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send("Error fetching tasks");
+      }
+
+      const total = result[0].total;
+      res.json({tasks, total}); // send tasks as JSON
+    });
+
   });
 });
 
